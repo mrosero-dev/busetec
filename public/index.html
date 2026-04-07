@@ -1,638 +1,1202 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sotracauca — Gestión de Buses</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root{--verde:#1a6b3a;--verde-m:#237a47;--verde-h:#1a5530;--negro:#111410;--g1:#f4f5f3;--g2:#e8ebe5;--g3:#c9cfc4;--gt:#5c6359;--blanco:#fafcf9;--rojo:#c0392b;--sw:260px;--r:12px;--rs:8px;--sh:0 2px 16px rgba(26,107,58,.10);--shl:0 8px 40px rgba(26,107,58,.14);--f:'DM Sans',sans-serif;--m:'DM Mono',monospace;--tr:.18s cubic-bezier(.4,0,.2,1)}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--f);background:var(--g1);color:var(--negro);min-height:100vh;display:flex}
-/* TOAST */
-#tc{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-.toast{background:var(--negro);color:#fff;padding:12px 20px;border-radius:var(--rs);font-size:14px;font-weight:500;animation:sI .25s ease;display:flex;align-items:center;gap:10px;box-shadow:var(--shl);max-width:340px}
-.toast.ok{border-left:4px solid #2e9b5e}.toast.er{border-left:4px solid var(--rojo)}.toast.wn{border-left:4px solid #e67e22}
-@keyframes sI{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
-/* LOGIN */
-#lv{width:100%;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#0d3d22,#1a6b3a 50%,#2e9b5e);position:fixed;inset:0;z-index:999;flex-direction:column;gap:32px}
-.llogo{display:flex;flex-direction:column;align-items:center;gap:12px}
-.lmark{width:64px;height:64px;background:rgba(255,255,255,.15);border-radius:16px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px)}
-.ltitle{color:#fff;font-size:26px;font-weight:700;letter-spacing:-.5px}
-.lsub{color:rgba(255,255,255,.65);font-size:14px}
-.lcard{background:rgba(255,255,255,.97);border-radius:20px;padding:40px 44px;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,.3)}
-.lcard h2{font-size:20px;font-weight:600;margin-bottom:6px}
-.lcard p{color:var(--gt);font-size:14px;margin-bottom:28px}
-/* FIELDS */
-.f{margin-bottom:18px}
-.f label{display:block;font-size:12px;font-weight:700;color:var(--gt);margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px}
-.f input,.f select,.f textarea{width:100%;padding:11px 14px;border:1.5px solid var(--g2);border-radius:var(--rs);font-family:var(--f);font-size:15px;color:var(--negro);background:var(--blanco);transition:border-color var(--tr);outline:none}
-.f textarea{resize:vertical;min-height:80px}
-.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--verde);box-shadow:0 0 0 3px rgba(26,107,58,.12)}
-.f input[readonly]{background:var(--g1);color:var(--gt)}
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:var(--rs);font-family:var(--f);font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all var(--tr)}
-.bp{background:var(--verde);color:#fff}.bp:hover{background:var(--verde-h);transform:translateY(-1px);box-shadow:0 4px 16px rgba(26,107,58,.35)}
-.bs{background:var(--g2);color:var(--negro)}.bs:hover{background:var(--g3)}
-.bd{background:#fde8e7;color:var(--rojo)}.bd:hover{background:#fac8c6}
-.bf{width:100%}.bsm{padding:7px 14px;font-size:13px}
-/* APP */
-#app{display:none;width:100%;min-height:100vh;flex-direction:row}
-#app.v{display:flex}
-/* SIDEBAR */
-#sb{width:var(--sw);min-height:100vh;background:var(--verde);color:#fff;display:flex;flex-direction:column;position:sticky;top:0;flex-shrink:0}
-.sh{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.12)}
-.sbr{display:flex;align-items:center;gap:12px;margin-bottom:20px}
-.si{width:40px;height:40px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sbn{font-weight:700;font-size:16px;line-height:1.2}.sbs{font-size:11px;opacity:.6;font-weight:400}
-.su{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.1);border-radius:var(--rs);padding:10px 12px}
-.av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0}
-.sun{font-size:13px;font-weight:600;line-height:1.2}.sur{font-size:11px;opacity:.65}
-.snav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px}
-.st{font-size:10px;font-weight:700;letter-spacing:1px;opacity:.5;text-transform:uppercase;padding:16px 8px 8px;margin-top:4px}
-.ni{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);font-size:14px;font-weight:500;cursor:pointer;transition:background var(--tr);color:rgba(255,255,255,.8)}
-.ni:hover{background:rgba(255,255,255,.12);color:#fff}
-.ni.act{background:rgba(255,255,255,.2);color:#fff;font-weight:600}
-.ni svg{width:17px;height:17px;opacity:.8;flex-shrink:0}.ni.act svg{opacity:1}
-.sf{padding:16px 12px 24px;border-top:1px solid rgba(255,255,255,.12)}
-.lo{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);font-size:14px;font-weight:500;cursor:pointer;color:rgba(255,255,255,.7);transition:all var(--tr)}
-.lo:hover{background:rgba(255,255,255,.1);color:#fff}
-/* MAIN */
-#mn{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.tb{background:var(--blanco);border-bottom:1px solid var(--g2);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
-.tbb{font-size:13px;color:var(--gt);display:flex;align-items:center;gap:6px}
-.tbb span{color:var(--verde);font-weight:600}
-.co{flex:1;padding:32px;overflow-y:auto}
-/* PAGES */
-.pv{display:none}.pv.act{display:block;animation:fU .22s ease}
-@keyframes fU{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-/* CARD */
-.card{background:var(--blanco);border-radius:var(--r);border:1px solid var(--g2);padding:28px;box-shadow:var(--sh)}
-.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--g2)}
-.ct{font-size:16px;font-weight:700;display:flex;align-items:center;gap:10px}
-.ct svg{color:var(--verde)}
-/* STATS */
-.sr{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px}
-.sc{background:var(--blanco);border:1px solid var(--g2);border-radius:var(--r);padding:20px 24px;box-shadow:var(--sh)}
-.sl{font-size:12px;font-weight:700;color:var(--gt);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-.sv{font-size:32px;font-weight:700;color:var(--negro);line-height:1}
-.ss{font-size:12px;color:var(--gt);margin-top:4px}
-/* TABLE */
-.tw{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:14px}
-thead th{background:var(--g1);text-align:left;padding:11px 14px;font-size:12px;font-weight:700;color:var(--gt);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--g2)}
-tbody tr{border-bottom:1px solid var(--g2);transition:background var(--tr)}
-tbody tr:hover{background:var(--g1)}
-tbody td{padding:13px 14px;color:var(--negro)}
-.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
-.bOk{background:#dcf5e8;color:#1a6b3a}.bErr{background:#fde8e7;color:var(--rojo)}.bWn{background:#fef3e2;color:#a0522d}
-/* FORM */
-.fg{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.fg .f.full{grid-column:1/-1}
-.fa{display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--g2)}
-/* PARADAS */
-.pl{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-.pi{display:flex;align-items:center;gap:10px;background:var(--g1);border:1px solid var(--g2);border-radius:var(--rs);padding:10px 14px;font-size:14px}
-.pn{width:24px;height:24px;background:var(--verde);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0}
-.pi span{flex:1}
-.pd{cursor:pointer;color:var(--g3);transition:color var(--tr);background:none;border:none;font-size:18px;line-height:1}
-.pd:hover{color:var(--rojo)}
-.ap{display:flex;gap:8px}.ap input{flex:1}
-/* SEARCH */
-.sb2{display:flex;gap:10px;margin-bottom:20px;align-items:center}
-.sb2 input{flex:1;max-width:360px}
-/* EMPTY */
-.es{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center}
-.ei{width:64px;height:64px;background:var(--g2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
-.ei svg{color:var(--g3)}.et{font-size:16px;font-weight:600;margin-bottom:6px}
-.esub{font-size:14px;color:var(--gt);margin-bottom:20px}
-/* MODAL */
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:800;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-.mo.op{display:flex;animation:fI .15s ease}
-@keyframes fI{from{opacity:0}to{opacity:1}}
-.modal{background:var(--blanco);border-radius:var(--r);padding:32px;max-width:420px;width:90%;box-shadow:var(--shl);animation:scI .18s cubic-bezier(.34,1.56,.64,1)}
-@keyframes scI{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
-.modal h3{font-size:18px;font-weight:700;margin-bottom:10px}
-.modal p{font-size:14px;color:var(--gt);margin-bottom:24px;line-height:1.6}
-.ma{display:flex;gap:12px;justify-content:flex-end}
-/* DETAIL */
-.dg{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
-.df dt{font-size:12px;font-weight:700;color:var(--gt);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.df dd{font-size:15px;font-weight:500}
-/* LOADER */
-.ld{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-/* SCROLL */
-::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--g3);border-radius:3px}
-@media(max-width:768px){#sb{display:none}.fg{grid-template-columns:1fr}.dg{grid-template-columns:1fr}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sotracauca — Gestión de Rutas</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ═══════════════════════════════════════════════
+       VARIABLES & RESET
+    ═══════════════════════════════════════════════ */
+    :root {
+      --verde:    #1a6b3a;
+      --verde-h:  #155230;
+      --verde-lt: #e8f5ee;
+      --negro:    #111410;
+      --g1:       #f4f5f3;
+      --g2:       #e6e9e3;
+      --g3:       #c8cec3;
+      --gt:       #5c6359;
+      --blanco:   #fafcf9;
+      --rojo:     #c0392b;
+      --rojo-lt:  #fde8e7;
+      --amarillo: #e67e22;
+      --sw:       264px;
+      --r:        12px;
+      --rs:       8px;
+      --sh:       0 1px 12px rgba(26,107,58,.09);
+      --shl:      0 8px 40px rgba(26,107,58,.16);
+      --f:        'DM Sans', sans-serif;
+      --m:        'DM Mono', monospace;
+      --tr:       .17s cubic-bezier(.4,0,.2,1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--f);
+      background: var(--g1);
+      color: var(--negro);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ═══════════════════════════════════════════════
+       TOASTS
+    ═══════════════════════════════════════════════ */
+    #tc {
+      position: fixed; top: 20px; right: 20px;
+      z-index: 9999; display: flex; flex-direction: column; gap: 8px;
+    }
+    .toast {
+      background: var(--negro); color: #fff;
+      padding: 13px 18px; border-radius: var(--rs);
+      font-size: 14px; font-weight: 500;
+      display: flex; align-items: flex-start; gap: 10px;
+      box-shadow: var(--shl); max-width: 380px; line-height: 1.5;
+      animation: toastIn .22s ease;
+    }
+    .toast.ok  { border-left: 4px solid #2e9b5e; }
+    .toast.er  { border-left: 4px solid var(--rojo); }
+    .toast.wn  { border-left: 4px solid var(--amarillo); }
+    .toast-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    @keyframes toastIn {
+      from { opacity:0; transform:translateX(16px); }
+      to   { opacity:1; transform:translateX(0); }
+    }
+
+    /* ═══════════════════════════════════════════════
+       CONFIRM MODAL
+    ═══════════════════════════════════════════════ */
+    .mo {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.42);
+      z-index: 800; display: none;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+    .mo.op { display: flex; animation: fadeIn .15s ease; }
+    .modal {
+      background: var(--blanco); border-radius: var(--r);
+      padding: 32px; max-width: 440px; width: 92%;
+      box-shadow: var(--shl);
+      animation: scaleIn .18s cubic-bezier(.34,1.56,.64,1);
+    }
+    .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .modal p  { font-size: 14px; color: var(--gt); margin-bottom: 24px; line-height: 1.6; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    @keyframes fadeIn  { from { opacity:0; } to { opacity:1; } }
+    @keyframes scaleIn { from { transform:scale(.9); opacity:0; } to { transform:scale(1); opacity:1; } }
+
+    /* ═══════════════════════════════════════════════
+       LOGIN
+    ═══════════════════════════════════════════════ */
+    #lv {
+      width: 100%; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(145deg, #0c3a20, #1a6b3a 55%, #2a8a50);
+      position: fixed; inset: 0; z-index: 999;
+      flex-direction: column; gap: 28px;
+    }
+    .l-logo {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .l-mark {
+      width: 72px; height: 72px;
+      background: rgba(255,255,255,.13);
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .l-title { color: #fff; font-size: 28px; font-weight: 700; letter-spacing: -.6px; }
+    .l-sub   { color: rgba(255,255,255,.6); font-size: 14px; }
+    .l-card {
+      background: rgba(255,255,255,.97); border-radius: 20px;
+      padding: 40px 44px; width: 100%; max-width: 420px;
+      box-shadow: 0 24px 72px rgba(0,0,0,.28);
+    }
+    .l-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .l-card > p { color: var(--gt); font-size: 14px; margin-bottom: 28px; }
+
+    /* ═══════════════════════════════════════════════
+       FIELDS
+    ═══════════════════════════════════════════════ */
+    .f { margin-bottom: 18px; }
+    .f label {
+      display: block; font-size: 12px; font-weight: 700;
+      color: var(--gt); margin-bottom: 7px;
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .f input, .f select, .f textarea {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid var(--g2); border-radius: var(--rs);
+      font-family: var(--f); font-size: 15px; color: var(--negro);
+      background: var(--blanco);
+      transition: border-color var(--tr), box-shadow var(--tr);
+      outline: none;
+    }
+    .f textarea { resize: vertical; min-height: 90px; }
+    .f input:focus, .f select:focus, .f textarea:focus {
+      border-color: var(--verde);
+      box-shadow: 0 0 0 3px rgba(26,107,58,.11);
+    }
+    .f input[readonly] { background: var(--g1); color: var(--gt); cursor: default; }
+    .f .err-msg { font-size: 12px; color: var(--rojo); margin-top: 5px; display: none; }
+    .f.invalid input, .f.invalid select, .f.invalid textarea { border-color: var(--rojo); }
+    .f.invalid .err-msg { display: block; }
+    .f-hint { font-size: 12px; color: var(--gt); margin-top: 4px; }
+
+    /* ═══════════════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════════════ */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 7px; padding: 11px 20px; border-radius: var(--rs);
+      font-family: var(--f); font-size: 14px; font-weight: 600;
+      cursor: pointer; border: none;
+      transition: all var(--tr); line-height: 1;
+    }
+    .bp { background: var(--verde); color: #fff; }
+    .bp:hover { background: var(--verde-h); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(26,107,58,.32); }
+    .bs { background: var(--g2); color: var(--negro); }
+    .bs:hover { background: var(--g3); }
+    .bd { background: var(--rojo-lt); color: var(--rojo); }
+    .bd:hover { background: #fac8c6; }
+    .bf { width: 100%; }
+    .bsm { padding: 7px 13px; font-size: 13px; }
+    .btn:disabled { opacity: .6; cursor: not-allowed; transform: none !important; }
+
+    /* ═══════════════════════════════════════════════
+       APP LAYOUT
+    ═══════════════════════════════════════════════ */
+    #app { display: none; width: 100%; min-height: 100vh; flex-direction: row; }
+    #app.v { display: flex; }
+
+    /* SIDEBAR */
+    #sb {
+      width: var(--sw); min-height: 100vh;
+      background: var(--verde); color: #fff;
+      display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh;
+      flex-shrink: 0; overflow-y: auto;
+    }
+    .sb-head {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .sb-brand {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+    }
+    .sb-icon {
+      width: 42px; height: 42px;
+      background: rgba(255,255,255,.15); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .sb-name { font-weight: 700; font-size: 16px; line-height: 1.2; }
+    .sb-sub  { font-size: 11px; opacity: .6; }
+    .sb-user {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.1); border-radius: var(--rs); padding: 10px 12px;
+    }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,.22);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; flex-shrink: 0;
+    }
+    .u-name { font-size: 13px; font-weight: 600; line-height: 1.2; }
+    .u-rol  { font-size: 11px; opacity: .65; }
+
+    .sb-nav { flex: 1; padding: 14px 10px; display: flex; flex-direction: column; gap: 2px; }
+    .nav-section {
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      opacity: .5; text-transform: uppercase;
+      padding: 14px 10px 6px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: var(--rs);
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      transition: background var(--tr); color: rgba(255,255,255,.8);
+    }
+    .nav-item:hover { background: rgba(255,255,255,.12); color: #fff; }
+    .nav-item.act   { background: rgba(255,255,255,.2); color: #fff; font-weight: 600; }
+    .nav-item svg   { width: 17px; height: 17px; opacity: .8; flex-shrink: 0; }
+    .nav-item.act svg { opacity: 1; }
+
+    .sb-foot {
+      padding: 14px 10px 22px;
+      border-top: 1px solid rgba(255,255,255,.12);
+    }
+    .logout {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: var(--rs);
+      font-size: 14px; font-weight: 500; cursor: pointer;
+      color: rgba(255,255,255,.7); transition: all var(--tr);
+    }
+    .logout:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+    /* MAIN */
+    #mn { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar {
+      background: var(--blanco); border-bottom: 1px solid var(--g2);
+      padding: 0 32px; height: 58px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+    }
+    .breadcrumb { font-size: 13px; color: var(--gt); display: flex; align-items: center; gap: 6px; }
+    .breadcrumb span { color: var(--verde); font-weight: 600; }
+    .content { flex: 1; padding: 28px 32px; overflow-y: auto; }
+
+    /* ═══════════════════════════════════════════════
+       PAGES
+    ═══════════════════════════════════════════════ */
+    .page { display: none; }
+    .page.act { display: block; animation: pageIn .2s ease; }
+    @keyframes pageIn {
+      from { opacity:0; transform:translateY(6px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* CARD */
+    .card {
+      background: var(--blanco); border-radius: var(--r);
+      border: 1px solid var(--g2); padding: 26px 28px;
+      box-shadow: var(--sh);
+    }
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 22px; padding-bottom: 16px;
+      border-bottom: 1px solid var(--g2);
+    }
+    .card-title {
+      font-size: 16px; font-weight: 700;
+      display: flex; align-items: center; gap: 9px;
+    }
+    .card-title svg { color: var(--verde); }
+
+    /* STATS */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px; margin-bottom: 26px;
+    }
+    .stat-card {
+      background: var(--blanco); border: 1px solid var(--g2);
+      border-radius: var(--r); padding: 20px 24px; box-shadow: var(--sh);
+    }
+    .stat-label {
+      font-size: 11px; font-weight: 700; color: var(--gt);
+      text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px;
+    }
+    .stat-val { font-size: 34px; font-weight: 700; color: var(--negro); line-height: 1; }
+    .stat-sub { font-size: 12px; color: var(--gt); margin-top: 4px; }
+    .stat-ok  .stat-val { color: var(--verde); }
+    .stat-err .stat-val { color: var(--rojo); }
+
+    /* TABLE */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead th {
+      background: var(--g1); text-align: left;
+      padding: 11px 14px; font-size: 11px; font-weight: 700;
+      color: var(--gt); text-transform: uppercase; letter-spacing: .5px;
+      border-bottom: 1px solid var(--g2);
+    }
+    tbody tr { border-bottom: 1px solid var(--g2); transition: background var(--tr); }
+    tbody tr:hover { background: var(--g1); }
+    tbody td { padding: 13px 14px; }
+    .code-cell { font-family: var(--m); font-weight: 600; color: var(--verde); }
+
+    /* BADGE */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    }
+    .b-ok  { background: #dcf5e8; color: var(--verde); }
+    .b-err { background: var(--rojo-lt); color: var(--rojo); }
+
+    /* FORM GRID */
+    .fg { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .fg .f.full { grid-column: 1 / -1; }
+    .form-actions {
+      display: flex; gap: 10px; justify-content: flex-end;
+      margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--g2);
+    }
+
+    /* PARADAS */
+    .paradas-list { list-style: none; display: flex; flex-direction: column; gap: 7px; margin-bottom: 10px; }
+    .parada-item {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--g1); border: 1px solid var(--g2);
+      border-radius: var(--rs); padding: 9px 13px; font-size: 14px;
+    }
+    .parada-num {
+      width: 24px; height: 24px; background: var(--verde); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .parada-item span { flex: 1; }
+    .parada-del {
+      cursor: pointer; color: var(--g3); background: none; border: none;
+      font-size: 20px; line-height: 1; transition: color var(--tr);
+    }
+    .parada-del:hover { color: var(--rojo); }
+    .add-parada { display: flex; gap: 8px; }
+    .add-parada input { flex: 1; }
+
+    /* SEARCH BAR */
+    .search-bar { display: flex; gap: 10px; margin-bottom: 18px; align-items: center; }
+    .search-bar input {
+      flex: 1; max-width: 420px; padding: 10px 14px;
+      border: 1.5px solid var(--g2); border-radius: var(--rs);
+      font-family: var(--f); font-size: 14px; outline: none;
+      transition: border-color var(--tr);
+      background: var(--blanco);
+    }
+    .search-bar input:focus { border-color: var(--verde); }
+
+    /* EMPTY STATE */
+    .empty {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 56px 20px; text-align: center;
+    }
+    .empty-icon {
+      width: 64px; height: 64px; background: var(--g2); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+    }
+    .empty-icon svg { color: var(--g3); }
+    .empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .empty-sub { font-size: 14px; color: var(--gt); margin-bottom: 20px; }
+
+    /* DETAIL */
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 4px; }
+    .detail-field dt {
+      font-size: 11px; font-weight: 700; color: var(--gt);
+      text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px;
+    }
+    .detail-field dd { font-size: 15px; font-weight: 500; }
+    .detail-field.full { grid-column: 1 / -1; }
+    .detail-field dd.desc { font-weight: 400; color: var(--gt); line-height: 1.6; }
+
+    /* PARADA ROW con tiempo */
+    .parada-tiempo { font-size: 12px; color: var(--gt); font-family: var(--m); }
+
+    /* INFO BOX */
+    .infobox {
+      background: var(--verde-lt); border: 1px solid #b7e4c7;
+      border-radius: var(--rs); padding: 12px 16px;
+      font-size: 13px; color: var(--verde); margin-bottom: 18px; line-height: 1.6;
+    }
+
+    /* LOADER */
+    .ld {
+      display: inline-block; width: 15px; height: 15px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--g3); border-radius: 3px; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      #sb { display: none; }
+      .fg { grid-template-columns: 1fr; }
+      .detail-grid { grid-template-columns: 1fr; }
+      .content { padding: 18px 16px; }
+    }
+  </style>
 </head>
 <body>
 
-<div id="tc"></div>
+  <!-- TOAST CONTAINER -->
+  <div id="tc"></div>
 
-<!-- CONFIRM MODAL -->
-<div class="mo" id="cm">
-  <div class="modal">
-    <h3 id="ct2">¿Confirmar?</h3>
-    <p id="cm2">Esta acción no se puede deshacer.</p>
-    <div class="ma">
-      <button class="btn bs" onclick="closeM()">Cancelar</button>
-      <button class="btn bd" id="cok">Confirmar</button>
+  <!-- CONFIRM MODAL -->
+  <div class="mo" id="confirm-modal">
+    <div class="modal">
+      <h3 id="cm-title">¿Confirmar?</h3>
+      <p  id="cm-body">Esta acción no se puede deshacer.</p>
+      <div class="modal-actions">
+        <button class="btn bs" onclick="closeModal()">Cancelar</button>
+        <button class="btn bd" id="cm-ok">Confirmar</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ═══ LOGIN ═══ -->
-<div id="lv">
-  <div class="llogo">
-    <div class="lmark">
-      <svg width="32" height="32" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M8 6v6m0 0v6m0-6h8m0-6v12M3 3h18M3 21h18"/></svg>
+  <!-- ════════════════════════════════════════════════
+       LOGIN
+  ════════════════════════════════════════════════ -->
+  <div id="lv">
+    <div class="l-logo">
+      <div class="l-mark">
+        <svg width="34" height="34" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13 6-3m-6 3V7m6 10 4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/>
+        </svg>
+      </div>
+      <div class="l-title">Sotracauca</div>
+      <div class="l-sub">Sistema de Gestión de Rutas</div>
     </div>
-    <div class="ltitle">Sotracauca</div>
-    <div class="lsub">Sistema de Gestión de Buses</div>
+
+    <div class="l-card">
+      <h2>Iniciar sesión</h2>
+      <p>Ingresa tus credenciales para acceder al sistema</p>
+
+      <div class="f" id="lf-u">
+        <label>Usuario</label>
+        <input type="text" id="l-user" placeholder="ej. operador" autocomplete="username" />
+        <div class="err-msg">El usuario es obligatorio</div>
+      </div>
+      <div class="f" id="lf-p">
+        <label>Contraseña</label>
+        <input type="password" id="l-pass" placeholder="••••••" autocomplete="current-password" />
+        <div class="err-msg">La contraseña es obligatoria</div>
+      </div>
+
+      <button class="btn bp bf" id="l-btn" onclick="doLogin()">Iniciar sesión</button>
+      <p style="font-size:12px;color:var(--gt);margin-top:16px;text-align:center">
+        Demo: <strong>admin</strong> / <strong>1234</strong> &nbsp;|&nbsp; <strong>operador</strong> / <strong>1234</strong>
+      </p>
+    </div>
   </div>
-  <div class="lcard">
-    <h2>Iniciar sesión</h2>
-    <p>Ingresa tus credenciales para acceder al sistema</p>
-    <div class="f"><label>Usuario</label><input type="text" id="lu" placeholder="admin" /></div>
-    <div class="f"><label>Contraseña</label><input type="password" id="lp" placeholder="••••••" /></div>
-    <button class="btn bp bf" id="lbtn" onclick="doLogin()">Iniciar sesión</button>
-    <p style="font-size:12px;color:var(--gt);margin-top:16px;text-align:center">Demo: <b>admin</b> / <b>1234</b> &nbsp;|&nbsp; <b>operador</b> / <b>1234</b></p>
-  </div>
-</div>
 
-<!-- ═══ APP ═══ -->
-<div id="app">
-  <!-- SIDEBAR -->
-  <aside id="sb">
-    <div class="sh">
-      <div class="sbr">
-        <div class="si"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M8 6v6m0 0v6m0-6h8m0-6v12M3 3h18M3 21h18"/></svg></div>
-        <div><div class="sbn">Sotracauca</div><div class="sbs">Gestión de Buses</div></div>
-      </div>
-      <div class="su">
-        <div class="av" id="sav">A</div>
-        <div><div class="sun" id="snm">Usuario</div><div class="sur" id="srl">Operador</div></div>
-      </div>
-    </div>
-    <nav class="snav">
-      <div class="st">Principal</div>
-      <div class="ni act" id="n-home" onclick="goTo('home',this)">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio
-      </div>
-      <div class="st">Sprint 1 — Rutas</div>
-      <div class="ni" id="n-lista-rutas" onclick="goTo('lista-rutas',this)">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13 6-3m-6 3V7m6 10 4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>Listar Rutas
-      </div>
-      <div class="ni" id="n-crear-ruta" onclick="goTo('crear-ruta',this)">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Crear Ruta
-      </div>
-      <div class="st">Sprint 2 — Buses</div>
-      <div class="ni" id="n-lista-buses" onclick="goTo('lista-buses',this)">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Listar Buses
-      </div>
-      <div class="ni" id="n-crear-bus" onclick="goTo('crear-bus',this)">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Registrar Bus
-      </div>
-      <div class="st">Sprint 2 — Conductores</div>
-      <div class="ni" id="n-lista-conductores" onclick="goTo('lista-conductores',this)">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Conductores
-      </div>
-      <div class="ni" id="n-crear-conductor" onclick="goTo('crear-conductor',this)">
-        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Registrar Conductor
-      </div>
-    </nav>
-    <div class="sf">
-      <div class="lo" onclick="doLogout()">
-        <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Cerrar sesión
-      </div>
-    </div>
-  </aside>
+  <!-- ════════════════════════════════════════════════
+       APP
+  ════════════════════════════════════════════════ -->
+  <div id="app">
 
-  <!-- MAIN -->
-  <main id="mn">
-    <div class="tb">
-      <div class="tbb">Sotracauca &rsaquo; <span id="bc">Inicio</span></div>
-    </div>
-    <div class="co">
-
-      <!-- HOME -->
-      <div class="pv act" id="page-home">
-        <div class="sr">
-          <div class="sc"><div class="sl">Total Rutas</div><div class="sv" id="s-rutas">—</div><div class="ss">Registradas</div></div>
-          <div class="sc"><div class="sl">Rutas Activas</div><div class="sv" id="s-act" style="color:var(--verde)">—</div><div class="ss">En servicio</div></div>
-          <div class="sc"><div class="sl">Total Buses</div><div class="sv" id="s-buses">—</div><div class="ss">En flota</div></div>
-          <div class="sc"><div class="sl">Conductores</div><div class="sv" id="s-cond">—</div><div class="ss">Registrados</div></div>
+    <!-- SIDEBAR -->
+    <aside id="sb">
+      <div class="sb-head">
+        <div class="sb-brand">
+          <div class="sb-icon">
+            <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13 6-3m-6 3V7m6 10 4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/>
+            </svg>
+          </div>
+          <div>
+            <div class="sb-name">Sotracauca</div>
+            <div class="sb-sub">Gestión de Rutas</div>
+          </div>
         </div>
-        <div class="card">
-          <div class="ch">
-            <div class="ct"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13 6-3m-6 3V7m6 10 4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>Rutas Recientes</div>
-            <button class="btn bp bsm" onclick="goTo('lista-rutas')">Ver todas</button>
-          </div>
-          <div id="home-rutas-wrap"></div>
-        </div>
-      </div>
-
-      <!-- LISTA RUTAS -->
-      <div class="pv" id="page-lista-rutas">
-        <div class="card">
-          <div class="ch">
-            <div class="ct"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13 6-3m-6 3V7m6 10 4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>Todas las Rutas</div>
-            <button class="btn bp bsm" onclick="goTo('crear-ruta')">+ Nueva</button>
-          </div>
-          <div class="sb2">
-            <input type="text" id="srch-ruta" placeholder="Buscar por código o descripción..." oninput="cargarRutas()" />
-          </div>
-          <div class="tw"><table><thead><tr><th>Código</th><th>Descripción</th><th>Paradas</th><th>T. Est.</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tb-rutas"></tbody></table></div>
-          <div id="em-rutas" class="es" style="display:none">
-            <div class="ei"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
-            <div class="et">Sin resultados</div><div class="esub">No se encontraron rutas</div>
+        <div class="sb-user">
+          <div class="avatar" id="s-av">O</div>
+          <div>
+            <div class="u-name" id="s-nm">Usuario</div>
+            <div class="u-rol"  id="s-rl">Operador</div>
           </div>
         </div>
       </div>
 
-      <!-- CREAR RUTA -->
-      <div class="pv" id="page-crear-ruta">
-        <div class="card">
-          <div class="ch"><div class="ct"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Crear Nueva Ruta</div></div>
-          <div class="fg">
-            <div class="f"><label>Código de Ruta *</label><input type="text" id="cr-cod" placeholder="ej. RT-004" /></div>
-            <div class="f"><label>Tiempo Estimado (min) *</label><input type="number" id="cr-t" min="1" placeholder="ej. 45" /></div>
-            <div class="f full"><label>Descripción *</label><textarea id="cr-desc" placeholder="Descripción del recorrido..."></textarea></div>
-            <div class="f full"><label>Estado</label><select id="cr-est"><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select></div>
-            <div class="f full"><label>Paradas</label><ul class="pl" id="cr-pl"></ul><div class="ap"><input type="text" id="cr-pi" placeholder="Nombre de la parada..." onkeydown="if(event.key==='Enter')addP('cr')"/><button class="btn bs bsm" onclick="addP('cr')">+ Agregar</button></div></div>
-          </div>
-          <div class="fa"><button class="btn bs" onclick="goTo('lista-rutas')">Cancelar</button><button class="btn bp" id="cr-save" onclick="guardarRuta()">Crear Ruta</button></div>
+      <nav class="sb-nav">
+        <div class="nav-section">Principal</div>
+        <div class="nav-item act" id="n-home" onclick="goTo('home',this)">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          Inicio
+        </div>
+
+        <div class="nav-section">Rutas</div>
+        <div class="nav-item" id="n-lista" onclick="goTo('lista',this)">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13 6-3m-6 3V7m6 10 4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/>
+          </svg>
+          Consultar Rutas
+        </div>
+        <div class="nav-item" id="n-crear" onclick="goTo('crear',this)">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          Crear Ruta
+        </div>
+      </nav>
+
+      <div class="sb-foot">
+        <div class="logout" onclick="doLogout()">
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Cerrar sesión
         </div>
       </div>
+    </aside>
 
-      <!-- EDITAR RUTA -->
-      <div class="pv" id="page-editar-ruta">
-        <div class="card">
-          <div class="ch"><div class="ct"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Modificar Ruta</div></div>
-          <div class="fg">
-            <div class="f"><label>Código</label><input type="text" id="ed-cod" readonly /></div>
-            <div class="f"><label>Tiempo Estimado (min) *</label><input type="number" id="ed-t" min="1" /></div>
-            <div class="f full"><label>Descripción *</label><textarea id="ed-desc"></textarea></div>
-            <div class="f full"><label>Estado</label><select id="ed-est"><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select></div>
-            <div class="f full"><label>Paradas</label><ul class="pl" id="ed-pl"></ul><div class="ap"><input type="text" id="ed-pi" placeholder="Nueva parada..." onkeydown="if(event.key==='Enter')addP('ed')"/><button class="btn bs bsm" onclick="addP('ed')">+ Agregar</button></div></div>
-          </div>
-          <div class="fa"><button class="btn bs" onclick="goTo('lista-rutas')">Cancelar</button><button class="btn bp" id="ed-save" onclick="actualizarRuta()">Guardar Cambios</button></div>
-        </div>
+    <!-- MAIN CONTENT -->
+    <main id="mn">
+      <div class="topbar">
+        <div class="breadcrumb">Sotracauca &rsaquo; <span id="bc">Inicio</span></div>
       </div>
+      <div class="content">
 
-      <!-- VER RUTA -->
-      <div class="pv" id="page-ver-ruta">
-        <div class="card">
-          <div class="ch">
-            <div class="ct"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Detalle de Ruta</div>
-            <div style="display:flex;gap:8px">
-              <button class="btn bs bsm" onclick="goTo('lista-rutas')">← Volver</button>
-              <button class="btn bp bsm" onclick="editarDesdeVer()">Editar</button>
+        <!-- ── INICIO ── -->
+        <div class="page act" id="page-home">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">Total Rutas</div>
+              <div class="stat-val" id="s-total">—</div>
+              <div class="stat-sub">Registradas en el sistema</div>
+            </div>
+            <div class="stat-card stat-ok">
+              <div class="stat-label">Rutas Activas</div>
+              <div class="stat-val" id="s-activas">—</div>
+              <div class="stat-sub">Operativas</div>
+            </div>
+            <div class="stat-card stat-err">
+              <div class="stat-label">Rutas Inactivas</div>
+              <div class="stat-val" id="s-inactivas">—</div>
+              <div class="stat-sub">Fuera de servicio</div>
             </div>
           </div>
-          <div class="dg" id="vr-det"></div>
-          <div style="margin-top:24px"><div style="font-size:12px;font-weight:700;color:var(--gt);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Paradas</div><ul class="pl" id="vr-par"></ul></div>
-        </div>
-      </div>
 
-      <!-- LISTA BUSES -->
-      <div class="pv" id="page-lista-buses">
-        <div class="card">
-          <div class="ch"><div class="ct"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Flota de Autobuses</div><button class="btn bp bsm" onclick="goTo('crear-bus')">+ Registrar</button></div>
-          <div class="tw"><table><thead><tr><th>Placa</th><th>Marca</th><th>Modelo</th><th>Año</th><th>Capacidad</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tb-buses"></tbody></table></div>
-          <div id="em-buses" class="es" style="display:none"><div class="ei"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/></svg></div><div class="et">Sin buses registrados</div><div class="esub">Registra el primer autobús</div></div>
-        </div>
-      </div>
-
-      <!-- CREAR BUS -->
-      <div class="pv" id="page-crear-bus">
-        <div class="card">
-          <div class="ch"><div class="ct"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Registrar Autobús</div></div>
-          <div class="fg">
-            <div class="f"><label>Placa *</label><input type="text" id="cb-placa" placeholder="ej. XYZ-123" /></div>
-            <div class="f"><label>Marca *</label><input type="text" id="cb-marca" placeholder="ej. Mercedes Benz" /></div>
-            <div class="f"><label>Modelo *</label><input type="text" id="cb-mod" placeholder="ej. OF 1721" /></div>
-            <div class="f"><label>Año *</label><input type="number" id="cb-año" placeholder="ej. 2020" min="1990" max="2030" /></div>
-            <div class="f"><label>Capacidad (pasajeros) *</label><input type="number" id="cb-cap" placeholder="ej. 45" min="1" /></div>
-            <div class="f"><label>Estado</label><select id="cb-est"><option value="apto">Apto</option><option value="no_apto">No apto</option></select></div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13 6-3m-6 3V7m6 10 4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                </svg>
+                Rutas Recientes
+              </div>
+              <button class="btn bp bsm" onclick="goTo('lista')">Ver todas</button>
+            </div>
+            <div id="home-table"></div>
           </div>
-          <div class="fa"><button class="btn bs" onclick="goTo('lista-buses')">Cancelar</button><button class="btn bp" id="cb-save" onclick="guardarBus()">Registrar Autobús</button></div>
         </div>
-      </div>
 
-      <!-- LISTA CONDUCTORES -->
-      <div class="pv" id="page-lista-conductores">
-        <div class="card">
-          <div class="ch"><div class="ct"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Conductores</div><button class="btn bp bsm" onclick="goTo('crear-conductor')">+ Registrar</button></div>
-          <div class="tw"><table><thead><tr><th>Cédula</th><th>Nombre</th><th>Teléfono</th><th>Licencia</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tb-cond"></tbody></table></div>
-          <div id="em-cond" class="es" style="display:none"><div class="ei"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="et">Sin conductores</div><div class="esub">Registra el primer conductor</div></div>
-        </div>
-      </div>
+        <!-- ── HU-3: CONSULTAR RUTAS ── -->
+        <div class="page" id="page-lista">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+                Consultar Rutas
+              </div>
+              <button class="btn bp bsm" onclick="goTo('crear')">+ Nueva Ruta</button>
+            </div>
 
-      <!-- CREAR CONDUCTOR -->
-      <div class="pv" id="page-crear-conductor">
-        <div class="card">
-          <div class="ch"><div class="ct"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Registrar Conductor</div></div>
-          <div class="fg">
-            <div class="f"><label>Cédula *</label><input type="text" id="cc-ced" placeholder="ej. 1075..." /></div>
-            <div class="f"><label>Nombre Completo *</label><input type="text" id="cc-nom" placeholder="ej. Carlos Muñoz" /></div>
-            <div class="f"><label>Teléfono</label><input type="text" id="cc-tel" placeholder="ej. 3001234567" /></div>
-            <div class="f"><label>Número de Licencia</label><input type="text" id="cc-lic" placeholder="ej. C2-12345" /></div>
-            <div class="f"><label>Estado</label><select id="cc-est"><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select></div>
+            <!-- HU-3 E1: buscar por código | E2: listar todas -->
+            <div class="search-bar">
+              <input type="text" id="q-ruta" placeholder="Buscar por código o descripción..." oninput="cargarRutas()" />
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Descripción</th>
+                    <th>Paradas</th>
+                    <th>T. Estimado</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="tb-rutas"></tbody>
+              </table>
+            </div>
+
+            <!-- HU-3 E4: ruta no encontrada -->
+            <div id="em-lista" class="empty" style="display:none">
+              <div class="empty-icon">
+                <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+              </div>
+              <div class="empty-title">Ruta no encontrada</div>
+              <div class="empty-sub" id="em-lista-msg">No existe ninguna ruta con ese criterio de búsqueda.</div>
+            </div>
           </div>
-          <div class="fa"><button class="btn bs" onclick="goTo('lista-conductores')">Cancelar</button><button class="btn bp" id="cc-save" onclick="guardarConductor()">Registrar</button></div>
         </div>
-      </div>
 
-    </div>
-  </main>
-</div>
+        <!-- ── HU-1: CREAR RUTA ── -->
+        <div class="page" id="page-crear">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+                </svg>
+                Crear Nueva Ruta
+              </div>
+            </div>
 
-<script>
-    const API = '/api';
-let USER = null, editId = null, crP = [], edP = [], confirmCb = null;
+            <div class="fg">
+              <!-- HU-1 E3: campos obligatorios -->
+              <div class="f" id="f-cr-cod">
+                <label>Código de Ruta *</label>
+                <input type="text" id="cr-cod" placeholder="ej. RT-004" />
+                <div class="err-msg">El código de la ruta es obligatorio</div>
+              </div>
+              <div class="f" id="f-cr-t">
+                <label>Tiempo Estimado (min) *</label>
+                <input type="number" id="cr-t" min="1" placeholder="ej. 45" />
+                <div class="err-msg">Ingresa un tiempo mayor a 0 minutos</div>
+              </div>
+              <div class="f full" id="f-cr-desc">
+                <label>Descripción *</label>
+                <textarea id="cr-desc" placeholder="Describe el recorrido de la ruta..."></textarea>
+                <div class="err-msg">La descripción de la ruta es obligatoria</div>
+              </div>
+              <div class="f full">
+                <label>Estado</label>
+                <select id="cr-est">
+                  <option value="activo">Activo</option>
+                  <option value="inactivo">Inactivo</option>
+                </select>
+              </div>
+              <div class="f full">
+                <label>Paradas del Recorrido</label>
+                <ul class="paradas-list" id="cr-pl"></ul>
+                <div class="add-parada">
+                  <input type="text" id="cr-pi" placeholder="Nombre de la parada..." onkeydown="if(event.key==='Enter'){event.preventDefault();addParada('cr')}" />
+                  <button class="btn bs bsm" onclick="addParada('cr')">+ Agregar</button>
+                </div>
+                <div class="f-hint">Agrega las paradas en orden. Puedes añadir tantas como necesites.</div>
+              </div>
+            </div>
 
-// ── TOAST ──
-function toast(m,t='ok'){const i={ok:'✓',er:'✕',wn:'⚠'};const e=document.createElement('div');e.className=`toast ${t}`;e.innerHTML=`<span>${i[t]}</span> ${m}`;document.getElementById('tc').appendChild(e);setTimeout(()=>e.remove(),3400)}
+            <div class="form-actions">
+              <button class="btn bs" onclick="goTo('lista')">Cancelar</button>
+              <button class="btn bp" id="cr-save" onclick="guardarRuta()">Crear Ruta</button>
+            </div>
+          </div>
+        </div>
 
-// ── MODAL ──
-function confirm_(ti,ms,cb){document.getElementById('ct2').textContent=ti;document.getElementById('cm2').textContent=ms;confirmCb=cb;document.getElementById('cm').classList.add('op')}
-function closeM(){document.getElementById('cm').classList.remove('op');confirmCb=null}
-document.getElementById('cok').onclick=()=>{if(confirmCb)confirmCb();closeM()}
-document.getElementById('cm').onclick=e=>{if(e.target===e.currentTarget)closeM()}
+        <!-- ── HU-2: MODIFICAR RUTA ── -->
+        <div class="page" id="page-editar">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                Modificar Ruta
+              </div>
+            </div>
 
-// ── API CALL ──
-async function api(method,url,body){
-  const opts={method,headers:{'Content-Type':'application/json'}};
-  if(body)opts.body=JSON.stringify(body);
-  const r=await fetch(API+url,opts);
-  const d=await r.json();
-  if(!r.ok)throw new Error(d.error||'Error del servidor');
-  return d;
-}
+            <div class="fg">
+              <div class="f">
+                <label>Código de Ruta</label>
+                <input type="text" id="ed-cod" readonly />
+              </div>
+              <div class="f" id="f-ed-t">
+                <label>Tiempo Estimado (min) *</label>
+                <input type="number" id="ed-t" min="1" />
+                <div class="err-msg">Ingresa un tiempo mayor a 0 minutos</div>
+              </div>
+              <div class="f full" id="f-ed-desc">
+                <label>Descripción *</label>
+                <textarea id="ed-desc"></textarea>
+                <div class="err-msg">La descripción no puede estar vacía</div>
+              </div>
+              <div class="f full">
+                <label>Estado</label>
+                <select id="ed-est">
+                  <option value="activo">Activo</option>
+                  <option value="inactivo">Inactivo</option>
+                </select>
+              </div>
+              <div class="f full">
+                <label>Paradas del Recorrido</label>
+                <ul class="paradas-list" id="ed-pl"></ul>
+                <div class="add-parada">
+                  <input type="text" id="ed-pi" placeholder="Nueva parada..." onkeydown="if(event.key==='Enter'){event.preventDefault();addParada('ed')}" />
+                  <button class="btn bs bsm" onclick="addParada('ed')">+ Agregar</button>
+                </div>
+              </div>
+            </div>
 
-// ── LOGIN ──
-async function doLogin(){
-  const u=document.getElementById('lu').value.trim();
-  const p=document.getElementById('lp').value;
-  if(!u||!p){toast('Completa usuario y contraseña','er');return}
-  const btn=document.getElementById('lbtn');
-  btn.innerHTML='<span class="ld"></span> Entrando...';btn.disabled=true;
-  try{
-    const d=await api('POST','/login',{username:u,password:p});
-    USER=d.usuario;
-    document.getElementById('sav').textContent=USER.nombre[0].toUpperCase();
-    document.getElementById('snm').textContent=USER.nombre;
-    document.getElementById('srl').textContent=USER.rol.replace('_',' ');
-    document.getElementById('lv').style.display='none';
-    document.getElementById('app').classList.add('v');
-    cargarStats();cargarHome();
-    toast(`Bienvenido, ${USER.nombre}!`);
-  }catch(e){toast(e.message,'er')}
-  btn.textContent='Iniciar sesión';btn.disabled=false;
-}
+            <!-- HU-2 E2: impedir guardar con datos incorrectos -->
+            <div class="form-actions">
+              <button class="btn bs" onclick="goTo('lista')">Cancelar</button>
+              <button class="btn bp" id="ed-save" onclick="actualizarRuta()">Guardar Cambios</button>
+            </div>
+          </div>
+        </div>
 
-function doLogout(){confirm_('Cerrar sesión','¿Deseas salir del sistema?',()=>{
-  document.getElementById('lv').style.display='';
-  document.getElementById('app').classList.remove('v');
-  document.getElementById('lu').value='';document.getElementById('lp').value='';
-})}
+        <!-- ── HU-3: VER DETALLE RUTA ── -->
+        <div class="page" id="page-ver">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+                Detalle de Ruta
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn bs bsm" onclick="goTo('lista')">← Volver</button>
+                <button class="btn bp bsm" onclick="editarDesdeVer()">Modificar</button>
+              </div>
+            </div>
 
-// ── NAV ──
-const TITLES={'home':'Inicio','lista-rutas':'Listar Rutas','crear-ruta':'Crear Ruta','editar-ruta':'Modificar Ruta','ver-ruta':'Consultar Ruta','lista-buses':'Flota de Buses','crear-bus':'Registrar Bus','lista-conductores':'Conductores','crear-conductor':'Registrar Conductor'};
-function goTo(pg,el){
-  document.querySelectorAll('.pv').forEach(p=>p.classList.remove('act'));
-  document.getElementById(`page-${pg}`).classList.add('act');
-  if(el){document.querySelectorAll('.ni').forEach(n=>n.classList.remove('act'));el.classList.add('act')}
-  document.getElementById('bc').textContent=TITLES[pg]||pg;
-  if(pg==='lista-rutas')cargarRutas();
-  if(pg==='crear-ruta')resetCR();
-  if(pg==='lista-buses')cargarBuses();
-  if(pg==='lista-conductores')cargarConductores();
-  if(pg==='home'){cargarStats();cargarHome()}
-}
+            <!-- HU-3 E1: mostrar toda la info de la ruta -->
+            <div class="detail-grid" id="ver-det"></div>
 
-// ── STATS ──
-async function cargarStats(){
-  try{
-    const [rutas,buses,cond]=await Promise.all([api('GET','/rutas'),api('GET','/autobuses'),api('GET','/conductores')]);
-    document.getElementById('s-rutas').textContent=rutas.length;
-    document.getElementById('s-act').textContent=rutas.filter(r=>r.estado==='activo').length;
-    document.getElementById('s-buses').textContent=buses.length;
-    document.getElementById('s-cond').textContent=cond.length;
-  }catch(e){}
-}
+            <!-- HU-3 E3: tiempos estimados por parada -->
+            <div style="margin-top:24px">
+              <div style="font-size:11px;font-weight:700;color:var(--gt);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">
+                Paradas y Tiempos Estimados
+              </div>
+              <div id="ver-paradas"></div>
+            </div>
+          </div>
+        </div>
 
-// ── HOME ──
-async function cargarHome(){
-  const w=document.getElementById('home-rutas-wrap');
-  try{
-    const rutas=await api('GET','/rutas');
-    if(!rutas.length){w.innerHTML=`<div class="es"><div class="ei"><svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13 6-3m-6 3V7m6 10 4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/></svg></div><div class="et">Sin rutas</div><div class="esub">Crea la primera ruta para comenzar</div><button class="btn bp" onclick="goTo('crear-ruta')">+ Crear Ruta</button></div>`;return}
-    const rec=rutas.slice(0,5);
-    w.innerHTML=`<div class="tw"><table><thead><tr><th>Código</th><th>Descripción</th><th>Paradas</th><th>Estado</th></tr></thead><tbody>${rec.map(r=>`<tr style="cursor:pointer" onclick="verRuta(${r.id})"><td><span style="font-family:var(--m);font-weight:600">${r.codigo}</span></td><td>${r.descripcion.slice(0,50)}${r.descripcion.length>50?'…':''}</td><td>${r.total_paradas}</td><td>${badge(r.estado)}</td></tr>`).join('')}</tbody></table></div>`;
-  }catch(e){w.innerHTML=`<p style="color:var(--gt);padding:20px">Error al cargar rutas</p>`}
-}
+      </div><!-- .content -->
+    </main>
+  </div><!-- #app -->
 
-// ── BADGE ──
-function badge(e){return e==='activo'||e==='apto'?'<span class="badge bOk">● Activo</span>':'<span class="badge bErr">● Inactivo</span>'}
-function badgeBus(e){return e==='apto'?'<span class="badge bOk">● Apto</span>':'<span class="badge bErr">● No apto</span>'}
+  <script>
+    /* ═══════════════════════════════════════════════
+       ESTADO GLOBAL
+    ═══════════════════════════════════════════════ */
+    let USER     = null;
+    let editId   = null;
+    let crP      = [];   // paradas form crear
+    let edP      = [];   // paradas form editar
+    let confirmCb = null;
 
-// ── RUTAS ──
-async function cargarRutas(){
-  const q=document.getElementById('srch-ruta')?.value||'';
-  const tbody=document.getElementById('tb-rutas');
-  const em=document.getElementById('em-rutas');
-  try{
-    const rutas=await api('GET',`/rutas?q=${encodeURIComponent(q)}`);
-    if(!rutas.length){tbody.innerHTML='';em.style.display='';return}
-    em.style.display='none';
-    tbody.innerHTML=rutas.map(r=>`<tr>
-      <td><span style="font-family:var(--m);font-weight:600;color:var(--verde)">${r.codigo}</span></td>
-      <td>${r.descripcion.slice(0,55)}${r.descripcion.length>55?'…':''}</td>
-      <td>${r.total_paradas}</td><td>${r.tiempo_min} min</td>
-      <td>${badge(r.estado)}</td>
-      <td><div style="display:flex;gap:6px">
-        <button class="btn bsm bs" onclick="verRuta(${r.id})">Ver</button>
-        <button class="btn bsm bp" onclick="editarRuta(${r.id})">Editar</button>
-        <button class="btn bsm bd" onclick="eliminarRuta(${r.id},'${r.codigo}')">Eliminar</button>
-      </div></td></tr>`).join('');
-  }catch(e){toast('Error cargando rutas','er')}
-}
+    /* ═══════════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════════ */
+    function toast(msg, type = 'ok') {
+      const icons = { ok: '✓', er: '✕', wn: '⚠' };
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `<span class="toast-icon">${icons[type]}</span><span>${msg}</span>`;
+      document.getElementById('tc').appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
 
-// ── PARADAS ──
-function renderP(pfx,arr){
-  document.getElementById(`${pfx}-pl`).innerHTML=arr.map((p,i)=>`<li class="pi"><span class="pn">${i+1}</span><span>${p}</span><button class="pd" onclick="remP('${pfx}',${i})">×</button></li>`).join('');
-}
-function addP(pfx){
-  const inp=document.getElementById(`${pfx}-pi`);
-  const v=inp.value.trim();
-  if(!v){toast('Escribe el nombre de la parada','wn');return}
-  if(pfx==='cr')crP.push(v);else edP.push(v);
-  renderP(pfx,pfx==='cr'?crP:edP);inp.value='';inp.focus();
-}
-function remP(pfx,i){
-  if(pfx==='cr'){crP.splice(i,1);renderP('cr',crP)}else{edP.splice(i,1);renderP('ed',edP)}
-}
+    /* ═══════════════════════════════════════════════
+       MODAL CONFIRMACIÓN
+    ═══════════════════════════════════════════════ */
+    function openModal(title, body, cb) {
+      document.getElementById('cm-title').textContent = title;
+      document.getElementById('cm-body').textContent  = body;
+      confirmCb = cb;
+      document.getElementById('confirm-modal').classList.add('op');
+    }
+    function closeModal() {
+      document.getElementById('confirm-modal').classList.remove('op');
+      confirmCb = null;
+    }
+    document.getElementById('cm-ok').onclick = () => { if (confirmCb) confirmCb(); closeModal(); };
+    document.getElementById('confirm-modal').onclick = e => {
+      if (e.target === e.currentTarget) closeModal();
+    };
 
-function resetCR(){
-  ['cr-cod','cr-t','cr-desc'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('cr-est').value='activo';crP=[];renderP('cr',crP);
-}
+    /* ═══════════════════════════════════════════════
+       API HELPER
+    ═══════════════════════════════════════════════ */
+    async function api(method, url, body) {
+      const opts = { method, headers: { 'Content-Type': 'application/json' } };
+      if (body) opts.body = JSON.stringify(body);
+      const r = await fetch('/api' + url, opts);
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Error del servidor');
+      return d;
+    }
 
-async function guardarRuta(){
-  const cod=document.getElementById('cr-cod').value.trim();
-  const desc=document.getElementById('cr-desc').value.trim();
-  const t=parseInt(document.getElementById('cr-t').value);
-  const est=document.getElementById('cr-est').value;
-  if(!cod){toast('El código es obligatorio','er');return}
-  if(!desc){toast('La descripción es obligatoria','er');return}
-  if(!t||t<1){toast('Tiempo inválido','er');return}
-  const btn=document.getElementById('cr-save');btn.disabled=true;btn.innerHTML='<span class="ld"></span>';
-  try{
-    const d=await api('POST','/rutas',{codigo:cod,descripcion:desc,tiempo_min:t,estado:est,paradas:crP});
-    toast(d.message||'Ruta creada');goTo('lista-rutas');cargarRutas();cargarStats();
-  }catch(e){toast(e.message,'er')}
-  btn.disabled=false;btn.textContent='Crear Ruta';
-}
+    /* ═══════════════════════════════════════════════
+       LOGIN
+    ═══════════════════════════════════════════════ */
+    async function doLogin() {
+      const u = document.getElementById('l-user').value.trim();
+      const p = document.getElementById('l-pass').value.trim();
+      let ok = true;
+      document.getElementById('lf-u').classList.toggle('invalid', !u); if (!u) ok = false;
+      document.getElementById('lf-p').classList.toggle('invalid', !p); if (!p) ok = false;
+      if (!ok) return;
 
-async function editarRuta(id){
-  try{
-    const r=await api('GET',`/rutas/${id}`);
-    editId=id;
-    document.getElementById('ed-cod').value=r.codigo;
-    document.getElementById('ed-desc').value=r.descripcion;
-    document.getElementById('ed-t').value=r.tiempo_min;
-    document.getElementById('ed-est').value=r.estado;
-    edP=r.paradas.map(p=>p.nombre);
-    renderP('ed',edP);goTo('editar-ruta');
-  }catch(e){toast(e.message,'er')}
-}
-function editarDesdeVer(){if(editId)editarRuta(editId)}
+      const btn = document.getElementById('l-btn');
+      btn.innerHTML = '<span class="ld"></span> Ingresando...';
+      btn.disabled = true;
 
-async function actualizarRuta(){
-  const desc=document.getElementById('ed-desc').value.trim();
-  const t=parseInt(document.getElementById('ed-t').value);
-  const est=document.getElementById('ed-est').value;
-  if(!desc){toast('La descripción es obligatoria','er');return}
-  if(!t||t<1){toast('Tiempo inválido','er');return}
-  const btn=document.getElementById('ed-save');btn.disabled=true;btn.innerHTML='<span class="ld"></span>';
-  try{
-    const d=await api('PUT',`/rutas/${editId}`,{descripcion:desc,tiempo_min:t,estado:est,paradas:edP});
-    toast(d.message||'Ruta actualizada');goTo('lista-rutas');cargarRutas();cargarStats();
-  }catch(e){toast(e.message,'er')}
-  btn.disabled=false;btn.textContent='Guardar Cambios';
-}
+      try {
+        const d = await api('POST', '/login', { username: u, password: p });
+        USER = d.usuario;
+        document.getElementById('s-av').textContent = USER.nombre[0].toUpperCase();
+        document.getElementById('s-nm').textContent = USER.nombre;
+        document.getElementById('s-rl').textContent = USER.rol;
+        document.getElementById('lv').style.display  = 'none';
+        document.getElementById('app').classList.add('v');
+        cargarStats();
+        cargarHome();
+        toast(`Bienvenido, ${USER.nombre}`);
+      } catch (e) {
+        toast(e.message, 'er');
+      }
 
-async function verRuta(id){
-  try{
-    const r=await api('GET',`/rutas/${id}`);editId=id;
-    document.getElementById('vr-det').innerHTML=`
-      <dl class="df"><dt>Código</dt><dd style="font-family:var(--m);color:var(--verde);font-size:17px">${r.codigo}</dd></dl>
-      <dl class="df"><dt>Estado</dt><dd>${badge(r.estado)}</dd></dl>
-      <dl class="df" style="grid-column:1/-1"><dt>Descripción</dt><dd style="font-weight:400;color:var(--gt)">${r.descripcion}</dd></dl>
-      <dl class="df"><dt>Tiempo Estimado</dt><dd>${r.tiempo_min} minutos</dd></dl>
-      <dl class="df"><dt>Total Paradas</dt><dd>${r.paradas.length}</dd></dl>
-      <dl class="df"><dt>Creado</dt><dd>${new Date(r.creado_en).toLocaleDateString('es-CO')}</dd></dl>`;
-    document.getElementById('vr-par').innerHTML=r.paradas.length
-      ?r.paradas.map((p,i)=>`<li class="pi"><span class="pn">${i+1}</span><span>${p.nombre}</span></li>`).join('')
-      :'<li style="color:var(--gt);font-size:14px;padding:10px 0">Sin paradas</li>';
-    goTo('ver-ruta');
-  }catch(e){toast(e.message,'er')}
-}
+      btn.textContent = 'Iniciar sesión';
+      btn.disabled = false;
+    }
 
-async function eliminarRuta(id,cod){
-  confirm_('Eliminar Ruta',`¿Eliminar la ruta ${cod}? Esta acción no se puede deshacer.`,async()=>{
-    try{await api('DELETE',`/rutas/${id}`);toast(`Ruta ${cod} eliminada`,'wn');cargarRutas();cargarStats()}catch(e){toast(e.message,'er')}
-  });
-}
+    function doLogout() {
+      openModal('Cerrar sesión', '¿Deseas salir del sistema?', () => {
+        document.getElementById('lv').style.display = '';
+        document.getElementById('app').classList.remove('v');
+        document.getElementById('l-user').value = '';
+        document.getElementById('l-pass').value = '';
+      });
+    }
 
-// ── BUSES ──
-async function cargarBuses(){
-  const tbody=document.getElementById('tb-buses');const em=document.getElementById('em-buses');
-  try{
-    const buses=await api('GET','/autobuses');
-    if(!buses.length){tbody.innerHTML='';em.style.display='';return}
-    em.style.display='none';
-    tbody.innerHTML=buses.map(b=>`<tr>
-      <td><span style="font-family:var(--m);font-weight:600;color:var(--verde)">${b.placa}</span></td>
-      <td>${b.marca}</td><td>${b.modelo}</td><td>${b.año}</td><td>${b.capacidad} pas.</td>
-      <td>${badgeBus(b.estado)}</td>
-      <td><div style="display:flex;gap:6px">
-        <button class="btn bsm bd" onclick="eliminarBus(${b.id},'${b.placa}')">Eliminar</button>
-      </div></td></tr>`).join('');
-  }catch(e){toast('Error cargando buses','er')}
-}
+    /* ═══════════════════════════════════════════════
+       NAVEGACIÓN
+    ═══════════════════════════════════════════════ */
+    const PAGE_TITLES = {
+      home:   'Inicio',
+      lista:  'Consultar Rutas',
+      crear:  'Crear Ruta',
+      editar: 'Modificar Ruta',
+      ver:    'Detalle de Ruta'
+    };
 
-async function guardarBus(){
-  const placa=document.getElementById('cb-placa').value.trim();
-  const marca=document.getElementById('cb-marca').value.trim();
-  const modelo=document.getElementById('cb-mod').value.trim();
-  const año=parseInt(document.getElementById('cb-año').value);
-  const cap=parseInt(document.getElementById('cb-cap').value);
-  const est=document.getElementById('cb-est').value;
-  if(!placa||!marca||!modelo||!año||!cap){toast('Todos los campos son obligatorios','er');return}
-  const btn=document.getElementById('cb-save');btn.disabled=true;btn.innerHTML='<span class="ld"></span>';
-  try{
-    const d=await api('POST','/autobuses',{placa,marca,modelo,año,capacidad:cap,estado:est});
-    toast(d.message||'Bus registrado');
-    ['cb-placa','cb-marca','cb-mod','cb-año','cb-cap'].forEach(id=>document.getElementById(id).value='');
-    goTo('lista-buses');cargarBuses();cargarStats();
-  }catch(e){toast(e.message,'er')}
-  btn.disabled=false;btn.textContent='Registrar Autobús';
-}
+    function goTo(pg, el) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('act'));
+      document.getElementById('page-' + pg).classList.add('act');
+      if (el) {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('act'));
+        el.classList.add('act');
+      }
+      document.getElementById('bc').textContent = PAGE_TITLES[pg] || pg;
+      if (pg === 'lista')  cargarRutas();
+      if (pg === 'crear')  resetCrear();
+      if (pg === 'home')   { cargarStats(); cargarHome(); }
+    }
 
-async function eliminarBus(id,placa){
-  confirm_('Eliminar Bus',`¿Eliminar el bus ${placa}?`,async()=>{
-    try{await api('DELETE',`/autobuses/${id}`);toast(`Bus ${placa} eliminado`,'wn');cargarBuses();cargarStats()}catch(e){toast(e.message,'er')}
-  });
-}
+    /* ═══════════════════════════════════════════════
+       BADGE & HELPERS
+    ═══════════════════════════════════════════════ */
+    function badge(e) {
+      return e === 'activo'
+        ? '<span class="badge b-ok">● Activo</span>'
+        : '<span class="badge b-err">● Inactivo</span>';
+    }
 
-// ── CONDUCTORES ──
-async function cargarConductores(){
-  const tbody=document.getElementById('tb-cond');const em=document.getElementById('em-cond');
-  try{
-    const cond=await api('GET','/conductores');
-    if(!cond.length){tbody.innerHTML='';em.style.display='';return}
-    em.style.display='none';
-    tbody.innerHTML=cond.map(c=>`<tr>
-      <td><span style="font-family:var(--m)">${c.cedula}</span></td>
-      <td><b>${c.nombre}</b></td><td>${c.telefono||'—'}</td><td>${c.licencia||'—'}</td>
-      <td>${badge(c.estado)}</td>
-      <td><button class="btn bsm bd" onclick="eliminarConductor(${c.id},'${c.nombre}')">Eliminar</button></td></tr>`).join('');
-  }catch(e){toast('Error','er')}
-}
+    /* ═══════════════════════════════════════════════
+       STATS (INICIO)
+    ═══════════════════════════════════════════════ */
+    async function cargarStats() {
+      try {
+        const rutas = await api('GET', '/rutas');
+        document.getElementById('s-total').textContent    = rutas.length;
+        document.getElementById('s-activas').textContent  = rutas.filter(r => r.estado === 'activo').length;
+        document.getElementById('s-inactivas').textContent = rutas.filter(r => r.estado !== 'activo').length;
+      } catch (_) {}
+    }
 
-async function guardarConductor(){
-  const ced=document.getElementById('cc-ced').value.trim();
-  const nom=document.getElementById('cc-nom').value.trim();
-  const tel=document.getElementById('cc-tel').value.trim();
-  const lic=document.getElementById('cc-lic').value.trim();
-  const est=document.getElementById('cc-est').value;
-  if(!ced||!nom){toast('Cédula y nombre son obligatorios','er');return}
-  const btn=document.getElementById('cc-save');btn.disabled=true;btn.innerHTML='<span class="ld"></span>';
-  try{
-    const d=await api('POST','/conductores',{cedula:ced,nombre:nom,telefono:tel,licencia:lic,estado:est});
-    toast(d.message||'Conductor registrado');
-    ['cc-ced','cc-nom','cc-tel','cc-lic'].forEach(id=>document.getElementById(id).value='');
-    goTo('lista-conductores');cargarConductores();cargarStats();
-  }catch(e){toast(e.message,'er')}
-  btn.disabled=false;btn.textContent='Registrar';
-}
+    async function cargarHome() {
+      const wrap = document.getElementById('home-table');
+      try {
+        const rutas = await api('GET', '/rutas');
+        if (!rutas.length) {
+          wrap.innerHTML = `
+            <div class="empty">
+              <div class="empty-icon">
+                <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13 6-3m-6 3V7m6 10 4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                </svg>
+              </div>
+              <div class="empty-title">Sin rutas registradas</div>
+              <div class="empty-sub">Crea la primera ruta para comenzar</div>
+              <button class="btn bp" onclick="goTo('crear')">+ Crear Ruta</button>
+            </div>`;
+          return;
+        }
+        const rec = rutas.slice(0, 5);
+        wrap.innerHTML = `
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Código</th><th>Descripción</th><th>Paradas</th><th>T. Estimado</th><th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rec.map(r => `
+                  <tr style="cursor:pointer" onclick="verRuta(${r.id})">
+                    <td class="code-cell">${r.codigo}</td>
+                    <td>${trim(r.descripcion, 55)}</td>
+                    <td>${r.total_paradas}</td>
+                    <td>${r.tiempo_min} min</td>
+                    <td>${badge(r.estado)}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>`;
+      } catch (e) {
+        wrap.innerHTML = '<p style="padding:20px;color:var(--gt)">Error al cargar rutas.</p>';
+      }
+    }
 
-async function eliminarConductor(id,nom){
-  confirm_('Eliminar Conductor',`¿Eliminar a ${nom}?`,async()=>{
-    try{await api('DELETE',`/conductores/${id}`);toast(`${nom} eliminado`,'wn');cargarConductores();cargarStats()}catch(e){toast(e.message,'er')}
-  });
-}
+    function trim(s, n) {
+      return s.length > n ? s.slice(0, n) + '…' : s;
+    }
 
-// ── INIT ──
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
-document.getElementById('lu').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('lp').focus()});
-document.getElementById('lp').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-</script>
+    /* ═══════════════════════════════════════════════
+       HU-3: CONSULTAR / LISTAR RUTAS
+    ═══════════════════════════════════════════════ */
+    async function cargarRutas() {
+      const q     = (document.getElementById('q-ruta')?.value || '').trim();
+      const tbody = document.getElementById('tb-rutas');
+      const em    = document.getElementById('em-lista');
+      const emMsg = document.getElementById('em-lista-msg');
+      try {
+        const rutas = await api('GET', '/rutas?q=' + encodeURIComponent(q));
+
+        // HU-3 E4: sin resultados
+        if (!rutas.length) {
+          tbody.innerHTML = '';
+          emMsg.textContent = q
+            ? `No existe ninguna ruta con el código o descripción "${q}".`
+            : 'No hay rutas registradas en el sistema.';
+          em.style.display = '';
+          return;
+        }
+
+        em.style.display = 'none';
+        tbody.innerHTML = rutas.map(r => `
+          <tr>
+            <td class="code-cell">${r.codigo}</td>
+            <td>${trim(r.descripcion, 60)}</td>
+            <td>${r.total_paradas}</td>
+            <td>${r.tiempo_min} min</td>
+            <td>${badge(r.estado)}</td>
+            <td>
+              <div style="display:flex;gap:6px">
+                <button class="btn bsm bs" onclick="verRuta(${r.id})">Ver</button>
+                <button class="btn bsm bp" onclick="editarRuta(${r.id})">Modificar</button>
+                <button class="btn bsm bd" onclick="eliminarRuta(${r.id},'${r.codigo}')">Eliminar</button>
+              </div>
+            </td>
+          </tr>`).join('');
+      } catch (e) {
+        toast('Error al cargar rutas: ' + e.message, 'er');
+      }
+    }
+
+    /* ═══════════════════════════════════════════════
+       PARADAS (shared)
+    ═══════════════════════════════════════════════ */
+    function renderParadas(pfx, arr) {
+      const ul = document.getElementById(pfx + '-pl');
+      ul.innerHTML = arr.length
+        ? arr.map((p, i) => `
+            <li class="parada-item">
+              <span class="parada-num">${i + 1}</span>
+              <span>${p}</span>
+              <button class="parada-del" onclick="remParada('${pfx}',${i})">×</button>
+            </li>`).join('')
+        : '';
+    }
+
+    function addParada(pfx) {
+      const inp = document.getElementById(pfx + '-pi');
+      const v   = inp.value.trim();
+      if (!v) { toast('Escribe el nombre de la parada', 'wn'); return; }
+      if (pfx === 'cr') crP.push(v); else edP.push(v);
+      renderParadas(pfx, pfx === 'cr' ? crP : edP);
+      inp.value = ''; inp.focus();
+    }
+
+    function remParada(pfx, i) {
+      if (pfx === 'cr') { crP.splice(i, 1); renderParadas('cr', crP); }
+      else              { edP.splice(i, 1); renderParadas('ed', edP); }
+    }
+
+    /* ═══════════════════════════════════════════════
+       HU-1: CREAR RUTA
+    ═══════════════════════════════════════════════ */
+    function resetCrear() {
+      ['cr-cod','cr-t','cr-desc'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('cr-est').value = 'activo';
+      ['f-cr-cod','f-cr-t','f-cr-desc'].forEach(id =>
+        document.getElementById(id).classList.remove('invalid'));
+      crP = []; renderParadas('cr', crP);
+    }
+
+    async function guardarRuta() {
+      const cod  = document.getElementById('cr-cod').value.trim().toUpperCase();
+      const desc = document.getElementById('cr-desc').value.trim();
+      const t    = parseInt(document.getElementById('cr-t').value);
+      const est  = document.getElementById('cr-est').value;
+
+      // HU-1 E3: validar campos obligatorios
+      let ok = true;
+      document.getElementById('f-cr-cod').classList.toggle('invalid', !cod);   if (!cod) ok = false;
+      document.getElementById('f-cr-desc').classList.toggle('invalid', !desc); if (!desc) ok = false;
+      document.getElementById('f-cr-t').classList.toggle('invalid', !t || t < 1); if (!t || t < 1) ok = false;
+
+      if (!ok) {
+        toast('Por favor completa todos los campos obligatorios para poder continuar.', 'er');
+        return;
+      }
+
+      const btn = document.getElementById('cr-save');
+      btn.disabled = true; btn.innerHTML = '<span class="ld"></span>';
+
+      try {
+        // HU-1 E1: crear — el servidor maneja E2 (duplicados)
+        const d = await api('POST', '/rutas', { codigo: cod, descripcion: desc, tiempo_min: t, estado: est, paradas: crP });
+        toast(d.message);
+        goTo('lista'); cargarStats();
+      } catch (e) {
+        // HU-1 E2: ruta ya existente o similar
+        toast(e.message, 'er');
+      }
+
+      btn.disabled = false; btn.textContent = 'Crear Ruta';
+    }
+
+    /* ═══════════════════════════════════════════════
+       HU-2: MODIFICAR RUTA
+    ═══════════════════════════════════════════════ */
+    async function editarRuta(id) {
+      try {
+        const r = await api('GET', '/rutas/' + id);
+        editId = id;
+        document.getElementById('ed-cod').value  = r.codigo;
+        document.getElementById('ed-desc').value = r.descripcion;
+        document.getElementById('ed-t').value    = r.tiempo_min;
+        document.getElementById('ed-est').value  = r.estado;
+        ['f-ed-desc','f-ed-t'].forEach(fid =>
+          document.getElementById(fid).classList.remove('invalid'));
+        edP = r.paradas.map(p => p.nombre);
+        renderParadas('ed', edP);
+        goTo('editar');
+      } catch (e) {
+        // HU-2 E4: ruta no encontrada
+        toast('La ruta no fue encontrada en el sistema.', 'er');
+      }
+    }
+
+    function editarDesdeVer() { if (editId) editarRuta(editId); }
+
+    async function actualizarRuta() {
+      const desc = document.getElementById('ed-desc').value.trim();
+      const t    = parseInt(document.getElementById('ed-t').value);
+      const est  = document.getElementById('ed-est').value;
+
+      // HU-2 E2: validar antes de guardar
+      let ok = true;
+      document.getElementById('f-ed-desc').classList.toggle('invalid', !desc); if (!desc) ok = false;
+      document.getElementById('f-ed-t').classList.toggle('invalid', !t || t < 1); if (!t || t < 1) ok = false;
+
+      if (!ok) {
+        toast('Corrige los campos marcados antes de guardar los cambios.', 'er');
+        return;
+      }
+
+      const btn = document.getElementById('ed-save');
+      btn.disabled = true; btn.innerHTML = '<span class="ld"></span>';
+
+      try {
+        // HU-2 E1/E3: guardar cambios y tiempos
+        const d = await api('PUT', '/rutas/' + editId, { descripcion: desc, tiempo_min: t, estado: est, paradas: edP });
+        toast(d.message);
+        goTo('lista'); cargarStats();
+      } catch (e) {
+        toast(e.message, 'er');
+      }
+
+      btn.disabled = false; btn.textContent = 'Guardar Cambios';
+    }
+
+    /* ═══════════════════════════════════════════════
+       HU-3: VER DETALLE
+    ═══════════════════════════════════════════════ */
+    async function verRuta(id) {
+      try {
+        const r = await api('GET', '/rutas/' + id);
+        editId = id;
+
+        // HU-3 E1: mostrar toda la info
+        document.getElementById('ver-det').innerHTML = `
+          <dl class="detail-field">
+            <dt>Código</dt>
+            <dd style="font-family:var(--m);color:var(--verde);font-size:20px;font-weight:700">${r.codigo}</dd>
+          </dl>
+          <dl class="detail-field">
+            <dt>Estado</dt><dd>${badge(r.estado)}</dd>
+          </dl>
+          <dl class="detail-field full">
+            <dt>Descripción</dt><dd class="desc">${r.descripcion}</dd>
+          </dl>
+          <dl class="detail-field">
+            <dt>Tiempo Estimado Total</dt><dd>${r.tiempo_min} minutos</dd>
+          </dl>
+          <dl class="detail-field">
+            <dt>Total de Paradas</dt><dd>${r.paradas.length}</dd>
+          </dl>
+          <dl class="detail-field">
+            <dt>Fecha de Creación</dt>
+            <dd>${new Date(r.creado_en + 'T00:00:00').toLocaleDateString('es-CO', {day:'2-digit',month:'long',year:'numeric'})}</dd>
+          </dl>
+        `;
+
+        // HU-3 E3: tiempos estimados por parada
+        if (r.paradas.length) {
+          const tpp = r.paradas.length > 1
+            ? Math.round(r.tiempo_min / (r.paradas.length - 1))
+            : r.tiempo_min;
+          document.getElementById('ver-paradas').innerHTML = `
+            <ul class="paradas-list">
+              ${r.paradas.map((p, i) => `
+                <li class="parada-item">
+                  <span class="parada-num">${i + 1}</span>
+                  <span style="flex:1">${p.nombre}</span>
+                  <span class="parada-tiempo">~${i === 0 ? 0 : tpp * i} min</span>
+                </li>`).join('')}
+            </ul>`;
+        } else {
+          document.getElementById('ver-paradas').innerHTML =
+            '<p style="color:var(--gt);font-size:14px">Esta ruta no tiene paradas registradas.</p>';
+        }
+
+        goTo('ver');
+      } catch (e) {
+        // HU-3 E4: ruta no encontrada
+        toast('Ruta no encontrada en el sistema.', 'er');
+      }
+    }
+
+    /* ═══════════════════════════════════════════════
+       ELIMINAR RUTA
+    ═══════════════════════════════════════════════ */
+    function eliminarRuta(id, cod) {
+      openModal(
+        'Eliminar Ruta',
+        `¿Estás seguro de que deseas eliminar la ruta ${cod}? Esta acción no se puede deshacer.`,
+        async () => {
+          try {
+            await api('DELETE', '/rutas/' + id);
+            toast(`Ruta ${cod} eliminada del sistema.`, 'wn');
+            cargarRutas(); cargarStats();
+          } catch (e) { toast(e.message, 'er'); }
+        }
+      );
+    }
+
+    /* ═══════════════════════════════════════════════
+       TECLADO
+    ═══════════════════════════════════════════════ */
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+    document.getElementById('l-user').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('l-pass').focus();
+    });
+    document.getElementById('l-pass').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+  </script>
 </body>
 </html>
